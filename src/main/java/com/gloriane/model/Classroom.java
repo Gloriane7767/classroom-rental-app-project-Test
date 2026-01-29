@@ -105,7 +105,7 @@ public class Classroom {
      * Whether accessibility is required
      * true if room meets all requirements
      */
-    
+
     // Check capacity: our capacity must be >= what they need
     public boolean meetsRequirements(int minCapacity, Set<String> requiredEquipment, boolean needsAccessibility) {
         boolean capacityOk = this.capacity >= minCapacity;
