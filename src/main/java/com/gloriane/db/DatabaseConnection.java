@@ -1,4 +1,4 @@
-package com.gloriane.model.db;
+package com.gloriane.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
