@@ -1,7 +1,9 @@
 package com.gloriane.db;
 
+import com.mysql.cj.jdbc.MysqlDataSource;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
@@ -9,12 +11,36 @@ public class DatabaseConnection {
     private static final String USER = "root";
     private static final String PASSWORD = "@Gloriane--001";
 
+    private static Connection connection;
+    private static DataSource dataSource;
+
+    // Singleton instance
     private static DatabaseConnection instance;
 
     private DatabaseConnection() {
         // private constructor for Singleton
     }
 
+    // Return a (cached) JDBC Connection to the database.
+    public static Connection getMySQLConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = getMySQLDataSource().getConnection();
+        }
+        return connection;
+    }
+
+    public static DataSource getMySQLDataSource() {
+        if (dataSource == null) {
+            MysqlDataSource mysqlDataSource = new MysqlDataSource();
+            mysqlDataSource.setUrl(URL);
+            mysqlDataSource.setUser(USER);
+            mysqlDataSource.setPassword(PASSWORD);
+            dataSource = mysqlDataSource;
+        }
+        return dataSource;
+    }
+
+    // Singleton accessor
     public static synchronized DatabaseConnection getInstance() {
         if (instance == null) {
             instance = new DatabaseConnection();
@@ -22,15 +48,10 @@ public class DatabaseConnection {
         return instance;
     }
 
-    //Gets a JDBC Connection to the database. And @return a Connection object, @throws SQLException if connection fails
-    public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
-    }
-
     // Tests if we can connect to the database.
-
     public boolean testConnection() {
-        try (Connection conn = getConnection()) {
+        // Use a fresh connection from the DataSource for the test
+        try (Connection conn = getMySQLDataSource().getConnection()) {
             System.out.println("✅ Database connection successful!");
             System.out.println("Connected to: " + conn.getMetaData().getDatabaseProductName());
             return true;
@@ -41,7 +62,7 @@ public class DatabaseConnection {
         }
     }
 
-    // Closes a connection safely.
+    // Closes a connection safely
     public void closeConnection(Connection conn) {
         if (conn != null) {
             try {
